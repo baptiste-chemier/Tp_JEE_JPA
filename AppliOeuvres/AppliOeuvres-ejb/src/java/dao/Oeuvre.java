@@ -12,6 +12,8 @@ import javax.persistence.Basic;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
@@ -19,6 +21,7 @@ import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
+import javax.persistence.TableGenerator;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 import javax.xml.bind.annotation.XmlRootElement;
@@ -39,21 +42,29 @@ import javax.xml.bind.annotation.XmlTransient;
 public class Oeuvre implements Serializable {
     private static final long serialVersionUID = 1L;
     @Id
+    @TableGenerator(name = "parametre", table = "parametre",
+            pkColumnName = "id_parametre", valueColumnName = "valparametre",
+            pkColumnValue = "OEUVRE", allocationSize = 1)
+    @GeneratedValue(strategy = GenerationType.TABLE, generator = "parametre")
     @Basic(optional = false)
     @NotNull
     @Column(name = "id_oeuvre")
     private Integer idOeuvre;
+    
     @Size(max = 250)
     @Column(name = "titre")
     private String titre;
+    
     // @Max(value=?)  @Min(value=?)//if you know range of your decimal fields consider using these annotations to enforce field validation
     @Column(name = "prix")
     private BigDecimal prix;
+    
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "oeuvre")
+    private List<Reservation> reservationList;
+    
     @JoinColumn(name = "id_proprietaire", referencedColumnName = "id_proprietaire")
     @ManyToOne(optional = false)
     private Proprietaire proprietaire;
-    @OneToMany(cascade = CascadeType.ALL, mappedBy = "oeuvre")
-    private List<Reservation> reservationList;
 
     public Oeuvre() {
     }
@@ -86,14 +97,6 @@ public class Oeuvre implements Serializable {
         this.prix = prix;
     }
 
-    public Proprietaire getProprietaire() {
-        return proprietaire;
-    }
-
-    public void setProprietaire(Proprietaire proprietaire) {
-        this.proprietaire = proprietaire;
-    }
-
     @XmlTransient
     public List<Reservation> getReservationList() {
         return reservationList;
@@ -101,6 +104,14 @@ public class Oeuvre implements Serializable {
 
     public void setReservationList(List<Reservation> reservationList) {
         this.reservationList = reservationList;
+    }
+
+    public Proprietaire getProprietaire() {
+        return proprietaire;
+    }
+
+    public void setProprietaire(Proprietaire proprietaire) {
+        this.proprietaire = proprietaire;
     }
 
     @Override

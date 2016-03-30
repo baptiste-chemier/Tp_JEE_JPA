@@ -15,7 +15,9 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
+import javax.persistence.Query;
 import javax.persistence.Table;
+import javax.persistence.TemporalType;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 import javax.xml.bind.annotation.XmlRootElement;
@@ -31,8 +33,12 @@ import javax.xml.bind.annotation.XmlRootElement;
     @NamedQuery(name = "Reservation.findAll", query = "SELECT r FROM Reservation r"),
     @NamedQuery(name = "Reservation.findByDateReservation", query = "SELECT r FROM Reservation r WHERE r.reservationPK.dateReservation = :dateReservation"),
     @NamedQuery(name = "Reservation.findByIdOeuvre", query = "SELECT r FROM Reservation r WHERE r.reservationPK.idOeuvre = :idOeuvre"),
-    @NamedQuery(name = "Reservation.findByStatut", query = "SELECT r FROM Reservation r WHERE r.statut = :statut")})
+    @NamedQuery(name = "Reservation.findByStatut", query = "SELECT r FROM Reservation r WHERE r.statut = :statut"),
+    @NamedQuery(name = "Reservation.findByDateReservationIdOeuvre", query = "SELECT r FROM Reservation r WHERE r.reservationPK.dateReservation = :dateReservation and r.reservationPK.idOeuvre=:idOeuvre")
+})
+
 public class Reservation implements Serializable {
+
     private static final long serialVersionUID = 1L;
     @EmbeddedId
     protected ReservationPK reservationPK;
@@ -41,12 +47,12 @@ public class Reservation implements Serializable {
     @Size(min = 1, max = 20)
     @Column(name = "statut")
     private String statut;
-    @JoinColumn(name = "id_oeuvre", referencedColumnName = "id_oeuvre", insertable = false, updatable = false)
-    @ManyToOne(optional = false)
-    private Oeuvre oeuvre;
     @JoinColumn(name = "id_adherent", referencedColumnName = "id_adherent")
     @ManyToOne(optional = false)
     private Adherent adherent;
+    @JoinColumn(name = "id_oeuvre", referencedColumnName = "id_oeuvre", insertable = false, updatable = false)
+    @ManyToOne(optional = false)
+    private Oeuvre oeuvre;
 
     public Reservation() {
     }
@@ -80,20 +86,20 @@ public class Reservation implements Serializable {
         this.statut = statut;
     }
 
-    public Oeuvre getOeuvre() {
-        return oeuvre;
-    }
-
-    public void setOeuvre(Oeuvre oeuvre) {
-        this.oeuvre = oeuvre;
-    }
-
     public Adherent getAdherent() {
         return adherent;
     }
 
     public void setAdherent(Adherent adherent) {
         this.adherent = adherent;
+    }
+
+    public Oeuvre getOeuvre() {
+        return oeuvre;
+    }
+
+    public void setOeuvre(Oeuvre oeuvre) {
+        this.oeuvre = oeuvre;
     }
 
     @Override
@@ -120,5 +126,5 @@ public class Reservation implements Serializable {
     public String toString() {
         return "dao.Reservation[ reservationPK=" + reservationPK + " ]";
     }
-    
+
 }
