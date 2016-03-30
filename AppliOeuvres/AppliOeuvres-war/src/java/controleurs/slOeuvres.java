@@ -185,7 +185,7 @@ public class slOeuvres extends HttpServlet {
      * @throws Exception
      */
     private String connecter(HttpServletRequest request) throws Exception {
-        return null;
+
         String login, pwd, vueReponse;
         try {
             vueReponse = "/home.jsp";
