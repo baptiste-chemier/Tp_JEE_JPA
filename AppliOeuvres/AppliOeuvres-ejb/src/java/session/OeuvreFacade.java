@@ -14,6 +14,10 @@ import java.util.List;
 import javax.ejb.EJB;
 import javax.ejb.Stateless;
 import javax.ejb.LocalBean;
+import javax.ejb.TransactionAttribute;
+import javax.ejb.TransactionAttributeType;
+import javax.ejb.TransactionManagement;
+import javax.ejb.TransactionManagementType;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import javax.persistence.Query;
@@ -25,6 +29,7 @@ import javax.persistence.TemporalType;
  */
 @Stateless
 @LocalBean
+@TransactionManagement(TransactionManagementType.CONTAINER)
 public class OeuvreFacade {
 
     // Add business logic below. (Right-click in editor and choose
@@ -71,14 +76,15 @@ public class OeuvreFacade {
      * @return
      * @throws Exception
      */
-    public List<Oeuvre> Liste_Oeuvres() throws Exception {
+    public List<Oeuvre> Lister_Oeuvres() throws Exception {
         try {
             return (em.createNamedQuery("Oeuvre.findAll").getResultList());
         } catch (Exception e) {
             throw e;
         }
     }
-
+    
+    @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public void Ajouter_Oeuvre(String titre, int id_proprietaire, double prix) throws Exception {
         Oeuvre oeuvreE = null;
         try {
@@ -91,7 +97,7 @@ public class OeuvreFacade {
             throw e;
         }
     }
-
+    @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public void Maj_Oeuvre(int id_oeuvre, int id_proprietaire, double prix, String titre) throws Exception {
         Oeuvre oeuvreE = null;
         Proprietaire proprietaireE = null;
@@ -106,7 +112,7 @@ public class OeuvreFacade {
             throw e;
         }
     }
-    
+
     public void Supprimer_Oeuvre_Id(int id_oeuvre) throws Exception {
         Oeuvre oeuvreE = null;
         try {

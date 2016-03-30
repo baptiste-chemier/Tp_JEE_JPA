@@ -4,13 +4,19 @@
  */
 package controleurs;
 
+import dao.Oeuvre;
+import dao.Proprietaire;
 import java.io.IOException;
+import java.util.List;
+import javax.ejb.EJB;
 import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
+import session.OeuvreFacade;
+import session.ProprietaireFacade;
 
 /**
  *
@@ -20,8 +26,16 @@ public class slOeuvres extends HttpServlet {
 
     private String erreur;
 
+    @EJB
+    private ProprietaireFacade proprietaireF;
+
+    @EJB
+    private OeuvreFacade oeuvreF;
+
     /**
-     * Processes requests for both HTTP <code>GET</code> and <code>POST</code> methods.
+     * Processes requests for both HTTP <code>GET</code> and <code>POST</code>
+     * methods.
+     *
      * @param request servlet request
      * @param response servlet response
      * @throws ServletException if a servlet-specific error occurs
@@ -36,9 +50,9 @@ public class slOeuvres extends HttpServlet {
             demande = getDemande(request);
             if (demande.equalsIgnoreCase("login.oe")) {
                 vueReponse = login(request);
-            } else  if (demande.equalsIgnoreCase("connecter.oe")) {
+            } else if (demande.equalsIgnoreCase("connecter.oe")) {
                 vueReponse = connecter(request);
-            } else  if (demande.equalsIgnoreCase("deconnecter.oe")) {
+            } else if (demande.equalsIgnoreCase("deconnecter.oe")) {
                 vueReponse = deconnecter(request);
             } else if (demande.equalsIgnoreCase("ajouter.oe")) {
                 vueReponse = creerOeuvre(request);
@@ -50,157 +64,151 @@ public class slOeuvres extends HttpServlet {
                 vueReponse = listerOeuvres(request);
             } else if (demande.equalsIgnoreCase("supprimer.oe")) {
                 vueReponse = supprimerOeuvre(request);
-            }  
+            }
         } catch (Exception e) {
             erreur = e.getMessage();
         } finally {
             request.setAttribute("erreurR", erreur);
-            request.setAttribute("pageR", vueReponse);            
+            request.setAttribute("pageR", vueReponse);
             RequestDispatcher dsp = request.getRequestDispatcher("/index.jsp");
-            if (vueReponse.contains(".oe"))
+            if (vueReponse.contains(".oe")) {
                 dsp = request.getRequestDispatcher(vueReponse);
+            }
             dsp.forward(request, response);
         }
     }
 
     /**
-     * Enregistre une oeuvre qui a été soit créée (id_oeuvre = 0)
-     * soit modifiée (id_oeuvre > 0)
+     * Enregistre une oeuvre qui a été soit créée (id_oeuvre = 0) soit modifiée
+     * (id_oeuvre > 0)
+     *
      * @param request
      * @return String page de redirection
      * @throws Exception
      */
     private String enregistrerOeuvre(HttpServletRequest request) throws Exception {
-        return null;
-        /*Oeuvre oeuvre;
-        String vueReponse, idOeuvre, idPropietaire;
+        String vueReponse, idOeuvre = "0", idPropietaire, titre;
+        double prix;
         int id_oeuvre;
         try {
-            oeuvre = new Oeuvre();
-            idOeuvre = request.getParameter("id");
+            if (request.getParameter("id") != "") {
+                idOeuvre = request.getParameter("id");
+            }
             id_oeuvre = Integer.parseInt(idOeuvre);
-            oeuvre.setId_oeuvre(id_oeuvre);
-            oeuvre.setTitre(request.getParameter("txtTitre"));
-            oeuvre.setPrix(Double.parseDouble(request.getParameter("txtPrix")));
+            titre = request.getParameter("txtTitre");
+            prix = Double.parseDouble(request.getParameter("txtPrix"));
             idPropietaire = request.getParameter("lProprietaires");
             int id_proprietaire = Integer.parseInt(idPropietaire);
-            oeuvre.setId_proprietaire(id_proprietaire);
             if (id_oeuvre > 0) {
-                oeuvre.modifier();
+                oeuvreF.Maj_Oeuvre(id_oeuvre, id_proprietaire, prix, titre);
             } else {
-                oeuvre.ajouter();
+                oeuvreF.Ajouter_Oeuvre(titre, id_proprietaire, prix);
             }
             vueReponse = "catalogue.oe";
             return (vueReponse);
         } catch (Exception e) {
             throw e;
-        }*/
+        }
     }
 
     /**
      * Lit et affiche une oeuvre pour pouvoir la modifier
+     *
      * @param request
      * @return String page de redirection
      * @throws Exception
      */
     private String modifierOeuvre(HttpServletRequest request) throws Exception {
-        return null;
-        /*Oeuvre oeuvre;
-        Proprietaire proprietaire = new Proprietaire();
         String vueReponse, id;
         int id_oeuvre;
         try {
             id = request.getParameter("id");
             id_oeuvre = Integer.parseInt(id);
-            oeuvre = new Oeuvre();
-            oeuvre.lire_Id(id_oeuvre);
+            Oeuvre oeuvre = oeuvreF.Lire_Oeuvre_Id(id_oeuvre);
             request.setAttribute("oeuvreR", oeuvre);
-            request.setAttribute("lstProprietairesR", proprietaire.liste());
+            request.setAttribute("lstProprietairesR", proprietaireF.findAll());
             request.setAttribute("titre", "Modifier une oeuvre");
             vueReponse = "/oeuvre.jsp";
             return (vueReponse);
         } catch (Exception e) {
             throw e;
-        }*/
+        }
     }
 
     /**
      * Supprimer une oeuvre
+     *
      * @param request
      * @return String page de redirection
      * @throws Exception
      */
     private String supprimerOeuvre(HttpServletRequest request) throws Exception {
-        return null;
-       /* Oeuvre oeuvre;
         String vueReponse, id, titre;
         int id_oeuvre;
-
         titre = "";
         try {
             id = request.getParameter("id");
             id_oeuvre = Integer.parseInt(id);
-            oeuvre = new Oeuvre();
-            oeuvre.lire_Id(id_oeuvre);
+            Oeuvre oeuvre = oeuvreF.Lire_Oeuvre_Id(id_oeuvre);
             titre = oeuvre.getTitre();
-            oeuvre.supprimer(id_oeuvre);
-            vueReponse = "catalogue.oe";           
-            return (vueReponse);  
+            oeuvreF.Supprimer_Oeuvre_Id(id_oeuvre);
+            vueReponse = "catalogue.oe";
+            return (vueReponse);
         } catch (Exception e) {
             erreur = e.getMessage();
-            if(erreur.contains("FK_RESERVATION_OEUVRE"))
-                erreur = "Il n'est pas possible de supprimer l'oeuvre : " + titre + " car elle a été réservée !";            
+            if (erreur.contains("FK_RESERVATION_OEUVRE")) {
+                erreur = "Il n'est pas possible de supprimer l'oeuvre : " + titre + " car elle a été réservée !";
+            }
             throw new Exception(erreur);
-        }*/
-    }    
+        }
+    }
+
     /**
-     * Affiche le formulaire vide d'une oeuvre
-     * Initialise la liste des propriétaires
-     * Initialise le titre de la page
+     * Affiche le formulaire vide d'une oeuvre Initialise la liste des
+     * propriétaires Initialise le titre de la page
+     *
      * @param request
      * @return String page de redirection
      * @throws Exception
      */
     private String creerOeuvre(HttpServletRequest request) throws Exception {
-        return null;
-      /*  Oeuvre oeuvre;
-        Proprietaire proprietaire = new Proprietaire();
+        Oeuvre oeuvre;
         String vueReponse;
         try {
             oeuvre = new Oeuvre();
             request.setAttribute("oeuvreR", oeuvre);
-            request.setAttribute("lstProprietairesR", proprietaire.liste());
+            request.setAttribute("lstProprietairesR", proprietaireF.findAll());
             request.setAttribute("titre", "Créer une oeuvre");
             vueReponse = "/oeuvre.jsp";
             return (vueReponse);
         } catch (Exception e) {
             throw e;
-        }*/
+        }
     }
 
     /**
      * Vérifie que l'utilisateur a saisi le bon login et mot de passe
+     *
      * @param request
      * @return String page de redirection
      * @throws Exception
      */
     private String connecter(HttpServletRequest request) throws Exception {
-
         String login, pwd, vueReponse;
         try {
             vueReponse = "/home.jsp";
             login = request.getParameter("txtLogin");
             pwd = request.getParameter("txtPwd");
-            Proprietaire proprietaire = new Proprietaire();
-            if (proprietaire.connecter(login, pwd)) {
+            Proprietaire proprietaire = proprietaireF.connecter(login, pwd);
+            if (proprietaire != null) {
                 vueReponse = "/home.jsp";
                 HttpSession session = request.getSession(true);
-                session.setAttribute("userId", proprietaire.getId_proprietaire());                
-                request.setAttribute("proprietaireR", proprietaire);                
+                session.setAttribute("userId", proprietaire.getIdProprietaire());
+                request.setAttribute("proprietaireR", proprietaire);
             } else {
                 vueReponse = "/login.jsp";
                 erreur = "Login ou mot de passe inconnus !";
-            }            
+            }
             return (vueReponse);
         } catch (Exception e) {
             throw e;
@@ -215,13 +223,14 @@ public class slOeuvres extends HttpServlet {
         } catch (Exception e) {
             throw e;
         }
-    } 
-    
+    }
+
     /**
      * Afficher la page de login
+     *
      * @param request
      * @return
-     * @throws Exception 
+     * @throws Exception
      */
     private String login(HttpServletRequest request) throws Exception {
         try {
@@ -229,27 +238,28 @@ public class slOeuvres extends HttpServlet {
         } catch (Exception e) {
             throw e;
         }
-    }    
+    }
+
     /**
      * liste des oeuvres pour le catalogue
+     *
      * @param request
      * @return String page de redirection
      * @throws Exception
      */
     private String listerOeuvres(HttpServletRequest request) throws Exception {
-        return null;
-        /*Oeuvre oeuvre;
         try {
-            oeuvre = new Oeuvre();
-            request.setAttribute("lstOeuvresR", oeuvre.liste());
+            List<Oeuvre> oeuvre = oeuvreF.Lister_Oeuvres();
+            request.setAttribute("lstOeuvresR", oeuvre);
             return ("/catalogue.jsp");
         } catch (Exception e) {
             throw e;
-        }*/
+        }
     }
 
     /**
      * Extrait le texte de la demande de l'URL
+     *
      * @param request
      * @return String texte de la demande
      */
@@ -261,8 +271,9 @@ public class slOeuvres extends HttpServlet {
     }
 
     // <editor-fold defaultstate="collapsed" desc="HttpServlet methods. Click on the + sign on the left to edit the code.">
-    /** 
+    /**
      * Handles the HTTP <code>GET</code> method.
+     *
      * @param request servlet request
      * @param response servlet response
      * @throws ServletException if a servlet-specific error occurs
@@ -274,8 +285,9 @@ public class slOeuvres extends HttpServlet {
         processRequest(request, response);
     }
 
-    /** 
+    /**
      * Handles the HTTP <code>POST</code> method.
+     *
      * @param request servlet request
      * @param response servlet response
      * @throws ServletException if a servlet-specific error occurs
@@ -287,8 +299,9 @@ public class slOeuvres extends HttpServlet {
         processRequest(request, response);
     }
 
-    /** 
+    /**
      * Returns a short description of the servlet.
+     *
      * @return a String containing servlet description
      */
     @Override

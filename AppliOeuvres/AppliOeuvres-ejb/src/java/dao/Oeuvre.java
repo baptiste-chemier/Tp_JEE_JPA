@@ -42,10 +42,10 @@ import javax.xml.bind.annotation.XmlTransient;
 public class Oeuvre implements Serializable {
     private static final long serialVersionUID = 1L;
     @Id
-    @TableGenerator(name = "parametre", table = "parametre",
-            pkColumnName = "id_parametre", valueColumnName = "valparametre",
+    @TableGenerator(name = "cleOeuvre", table = "cles",
+            pkColumnName = "id_cle", valueColumnName = "val_cle",
             pkColumnValue = "OEUVRE", allocationSize = 1)
-    @GeneratedValue(strategy = GenerationType.TABLE, generator = "parametre")
+    @GeneratedValue(strategy = GenerationType.TABLE, generator = "cleOeuvre")
     @Basic(optional = false)
     @NotNull
     @Column(name = "id_oeuvre")

@@ -11,11 +11,14 @@ import javax.persistence.Basic;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
+import javax.persistence.TableGenerator;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 import javax.xml.bind.annotation.XmlRootElement;
@@ -38,6 +41,10 @@ import javax.xml.bind.annotation.XmlTransient;
 public class Proprietaire implements Serializable {
     private static final long serialVersionUID = 1L;
     @Id
+    @TableGenerator(name = "cleProprietaire", table = "cles",
+            pkColumnName = "id_cle", valueColumnName = "val_cle",
+            pkColumnValue = "PROPRIETAIRE", allocationSize = 1)
+    @GeneratedValue(strategy = GenerationType.TABLE, generator = "cleProprietaire")
     @Basic(optional = false)
     @NotNull
     @Column(name = "id_proprietaire")
