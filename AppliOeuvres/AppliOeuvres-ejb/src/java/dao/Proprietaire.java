@@ -39,6 +39,7 @@ import javax.xml.bind.annotation.XmlTransient;
     @NamedQuery(name = "Proprietaire.findByLogin", query = "SELECT p FROM Proprietaire p WHERE p.login = :login"),
     @NamedQuery(name = "Proprietaire.findByPwd", query = "SELECT p FROM Proprietaire p WHERE p.pwd = :pwd")})
 public class Proprietaire implements Serializable {
+
     private static final long serialVersionUID = 1L;
     @Id
     @TableGenerator(name = "cleProprietaire", table = "cles",
@@ -144,5 +145,5 @@ public class Proprietaire implements Serializable {
     public String toString() {
         return "dao.Proprietaire[ idProprietaire=" + idProprietaire + " ]";
     }
-    
+
 }

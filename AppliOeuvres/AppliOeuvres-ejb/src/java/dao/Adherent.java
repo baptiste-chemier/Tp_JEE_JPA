@@ -34,6 +34,7 @@ import javax.xml.bind.annotation.XmlTransient;
     @NamedQuery(name = "Adherent.findByNomAdherent", query = "SELECT a FROM Adherent a WHERE a.nomAdherent = :nomAdherent"),
     @NamedQuery(name = "Adherent.findByPrenomAdherent", query = "SELECT a FROM Adherent a WHERE a.prenomAdherent = :prenomAdherent")})
 public class Adherent implements Serializable {
+
     private static final long serialVersionUID = 1L;
     @Id
     @Basic(optional = false)
@@ -113,5 +114,5 @@ public class Adherent implements Serializable {
     public String toString() {
         return "dao.Adherent[ idAdherent=" + idAdherent + " ]";
     }
-    
+
 }

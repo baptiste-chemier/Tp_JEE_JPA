@@ -20,6 +20,7 @@ import javax.validation.constraints.NotNull;
  */
 @Embeddable
 public class ReservationPK implements Serializable {
+
     @Basic(optional = false)
     @NotNull
     @Column(name = "date_reservation")
@@ -82,5 +83,5 @@ public class ReservationPK implements Serializable {
     public String toString() {
         return "dao.ReservationPK[ dateReservation=" + dateReservation + ", idOeuvre=" + idOeuvre + " ]";
     }
-    
+
 }

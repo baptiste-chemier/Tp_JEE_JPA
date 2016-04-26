@@ -7,7 +7,6 @@ package controleurs;
 import dao.Oeuvre;
 import dao.Proprietaire;
 import java.io.IOException;
-import java.util.List;
 import javax.ejb.EJB;
 import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletException;
@@ -15,6 +14,7 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
+import outils.Utilitaire;
 import session.OeuvreFacade;
 import session.ProprietaireFacade;
 
@@ -55,15 +55,15 @@ public class slOeuvres extends HttpServlet {
             } else if (demande.equalsIgnoreCase("deconnecter.oe")) {
                 vueReponse = deconnecter(request);
             } else if (demande.equalsIgnoreCase("ajouter.oe")) {
-                vueReponse = creerOeuvre(request);
+                vueReponse = createOeuvre(request);
             } else if (demande.equalsIgnoreCase("enregistrer.oe")) {
-                vueReponse = enregistrerOeuvre(request);
+                vueReponse = saveOeuvre(request);
             } else if (demande.equalsIgnoreCase("modifier.oe")) {
-                vueReponse = modifierOeuvre(request);
+                vueReponse = editOeuvre(request);
             } else if (demande.equalsIgnoreCase("catalogue.oe")) {
-                vueReponse = listerOeuvres(request);
+                vueReponse = findAll(request);
             } else if (demande.equalsIgnoreCase("supprimer.oe")) {
-                vueReponse = supprimerOeuvre(request);
+                vueReponse = deleteOeuvre(request);
             }
         } catch (Exception e) {
             erreur = e.getMessage();
@@ -86,12 +86,14 @@ public class slOeuvres extends HttpServlet {
      * @return String page de redirection
      * @throws Exception
      */
-    private String enregistrerOeuvre(HttpServletRequest request) throws Exception {
-        String vueReponse, idOeuvre = "0", idPropietaire, titre;
+    private String saveOeuvre(HttpServletRequest request) throws Exception {
+        String vueReponse, idOeuvre;
+        idOeuvre = "0";
+        String idPropietaire, titre;
         double prix;
         int id_oeuvre;
         try {
-            if (request.getParameter("id") != "") {
+            if (!"".equals(request.getParameter("id"))) {
                 idOeuvre = request.getParameter("id");
             }
             id_oeuvre = Integer.parseInt(idOeuvre);
@@ -100,9 +102,9 @@ public class slOeuvres extends HttpServlet {
             idPropietaire = request.getParameter("lProprietaires");
             int id_proprietaire = Integer.parseInt(idPropietaire);
             if (id_oeuvre > 0) {
-                oeuvreF.Maj_Oeuvre(id_oeuvre, id_proprietaire, prix, titre);
+                oeuvreF.updateOeuvre(id_oeuvre, id_proprietaire, prix, titre);
             } else {
-                oeuvreF.Ajouter_Oeuvre(titre, id_proprietaire, prix);
+                oeuvreF.addOeuvre(titre, id_proprietaire, prix);
             }
             vueReponse = "catalogue.oe";
             return (vueReponse);
@@ -118,14 +120,13 @@ public class slOeuvres extends HttpServlet {
      * @return String page de redirection
      * @throws Exception
      */
-    private String modifierOeuvre(HttpServletRequest request) throws Exception {
+    private String editOeuvre(HttpServletRequest request) throws Exception {
         String vueReponse, id;
         int id_oeuvre;
         try {
             id = request.getParameter("id");
             id_oeuvre = Integer.parseInt(id);
-            Oeuvre oeuvre = oeuvreF.Lire_Oeuvre_Id(id_oeuvre);
-            request.setAttribute("oeuvreR", oeuvre);
+            request.setAttribute("oeuvreR", oeuvreF.findOeuvreById(id_oeuvre));
             request.setAttribute("lstProprietairesR", proprietaireF.findAll());
             request.setAttribute("titre", "Modifier une oeuvre");
             vueReponse = "/oeuvre.jsp";
@@ -142,20 +143,20 @@ public class slOeuvres extends HttpServlet {
      * @return String page de redirection
      * @throws Exception
      */
-    private String supprimerOeuvre(HttpServletRequest request) throws Exception {
+    private String deleteOeuvre(HttpServletRequest request) throws Exception {
         String vueReponse, id, titre;
         int id_oeuvre;
         titre = "";
         try {
             id = request.getParameter("id");
             id_oeuvre = Integer.parseInt(id);
-            Oeuvre oeuvre = oeuvreF.Lire_Oeuvre_Id(id_oeuvre);
+            Oeuvre oeuvre = oeuvreF.findOeuvreById(id_oeuvre);
             titre = oeuvre.getTitre();
-            oeuvreF.Supprimer_Oeuvre_Id(id_oeuvre);
+            oeuvreF.deleteOeuvre(id_oeuvre);
             vueReponse = "catalogue.oe";
             return (vueReponse);
         } catch (Exception e) {
-            erreur = e.getMessage();
+            erreur = Utilitaire.getExceptionCause(e);
             if (erreur.contains("FK_RESERVATION_OEUVRE")) {
                 erreur = "Il n'est pas possible de supprimer l'oeuvre : " + titre + " car elle a été réservée !";
             }
@@ -171,12 +172,10 @@ public class slOeuvres extends HttpServlet {
      * @return String page de redirection
      * @throws Exception
      */
-    private String creerOeuvre(HttpServletRequest request) throws Exception {
-        Oeuvre oeuvre;
+    private String createOeuvre(HttpServletRequest request) throws Exception {
         String vueReponse;
         try {
-            oeuvre = new Oeuvre();
-            request.setAttribute("oeuvreR", oeuvre);
+            request.setAttribute("oeuvreR", new Oeuvre());
             request.setAttribute("lstProprietairesR", proprietaireF.findAll());
             request.setAttribute("titre", "Créer une oeuvre");
             vueReponse = "/oeuvre.jsp";
@@ -247,10 +246,9 @@ public class slOeuvres extends HttpServlet {
      * @return String page de redirection
      * @throws Exception
      */
-    private String listerOeuvres(HttpServletRequest request) throws Exception {
+    private String findAll(HttpServletRequest request) throws Exception {
         try {
-            List<Oeuvre> oeuvre = oeuvreF.Lister_Oeuvres();
-            request.setAttribute("lstOeuvresR", oeuvre);
+            request.setAttribute("lstOeuvresR", oeuvreF.findAll());
             return ("/catalogue.jsp");
         } catch (Exception e) {
             throw e;

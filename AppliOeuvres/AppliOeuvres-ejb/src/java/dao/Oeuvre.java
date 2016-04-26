@@ -40,6 +40,7 @@ import javax.xml.bind.annotation.XmlTransient;
     @NamedQuery(name = "Oeuvre.findByTitre", query = "SELECT o FROM Oeuvre o WHERE o.titre = :titre"),
     @NamedQuery(name = "Oeuvre.findByPrix", query = "SELECT o FROM Oeuvre o WHERE o.prix = :prix")})
 public class Oeuvre implements Serializable {
+
     private static final long serialVersionUID = 1L;
     @Id
     @TableGenerator(name = "cleOeuvre", table = "cles",
@@ -50,18 +51,18 @@ public class Oeuvre implements Serializable {
     @NotNull
     @Column(name = "id_oeuvre")
     private Integer idOeuvre;
-    
+
     @Size(max = 250)
     @Column(name = "titre")
     private String titre;
-    
+
     // @Max(value=?)  @Min(value=?)//if you know range of your decimal fields consider using these annotations to enforce field validation
     @Column(name = "prix")
     private BigDecimal prix;
-    
-    @OneToMany(cascade = CascadeType.ALL, mappedBy = "oeuvre")
+
+    @OneToMany(mappedBy = "oeuvre")
     private List<Reservation> reservationList;
-    
+
     @JoinColumn(name = "id_proprietaire", referencedColumnName = "id_proprietaire")
     @ManyToOne(optional = false)
     private Proprietaire proprietaire;
@@ -138,5 +139,5 @@ public class Oeuvre implements Serializable {
     public String toString() {
         return "dao.Oeuvre[ idOeuvre=" + idOeuvre + " ]";
     }
-    
+
 }

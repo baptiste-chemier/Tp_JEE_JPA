@@ -40,7 +40,11 @@ public class OeuvreFacade {
     @EJB
     private ProprietaireFacade proprietaireF;
 
-    public Reservation Lire_Reservation_Id(Date dateReservation, int id_oeuvre) throws Exception {
+    @EJB
+    private ReservationFacade reservationF;
+
+    @TransactionAttribute(TransactionAttributeType.REQUIRED)
+    public Reservation findReservationByOeuvreId(Date dateReservation, int id_oeuvre) throws Exception {
         try {
             Query query = em.createNamedQuery("Reservation.findByDateReservationIdOeuvre");
             query.setParameter("dateReservation", dateReservation, TemporalType.DATE);
@@ -62,9 +66,11 @@ public class OeuvreFacade {
      * @return
      * @throws Exception
      */
-    public Oeuvre Lire_Oeuvre_Id(int id_oeuvre) throws Exception {
+    public Oeuvre findOeuvreById(int id_oeuvre) throws Exception {
         try {
-            return em.find(Oeuvre.class, id_oeuvre);
+            Query query = em.createNamedQuery("Oeuvre.findByIdOeuvre");
+            query.setParameter("idOeuvre", id_oeuvre);
+            return (Oeuvre) query.getSingleResult();
         } catch (Exception e) {
             throw e;
         }
@@ -76,48 +82,53 @@ public class OeuvreFacade {
      * @return
      * @throws Exception
      */
-    public List<Oeuvre> Lister_Oeuvres() throws Exception {
+    public List<Oeuvre> findAll() throws Exception {
         try {
             return (em.createNamedQuery("Oeuvre.findAll").getResultList());
         } catch (Exception e) {
             throw e;
         }
     }
-    
+
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
-    public void Ajouter_Oeuvre(String titre, int id_proprietaire, double prix) throws Exception {
-        Oeuvre oeuvreE = null;
+    public void addOeuvre(String titre, int id_proprietaire, double prix) throws Exception {
         try {
-            oeuvreE = new Oeuvre();
-            oeuvreE.setProprietaire(proprietaireF.Lire_Proprietaire_Id(id_proprietaire));
-            oeuvreE.setPrix(BigDecimal.valueOf(prix));
-            oeuvreE.setTitre(titre);
-            em.persist(oeuvreE);
-        } catch (Exception e) {
-            throw e;
-        }
-    }
-    @TransactionAttribute(TransactionAttributeType.REQUIRED)
-    public void Maj_Oeuvre(int id_oeuvre, int id_proprietaire, double prix, String titre) throws Exception {
-        Oeuvre oeuvreE = null;
-        Proprietaire proprietaireE = null;
-        try {
-            oeuvreE = Lire_Oeuvre_Id(id_oeuvre);
-            proprietaireE = proprietaireF.Lire_Proprietaire_Id(id_proprietaire);
-            oeuvreE.setPrix(BigDecimal.valueOf(prix));
-            oeuvreE.setTitre(titre);
-            oeuvreE.setProprietaire(proprietaireE);
-            em.merge(oeuvreE);
+            Oeuvre oeuvre = new Oeuvre();
+            oeuvre.setProprietaire(proprietaireF.Lire_Proprietaire_Id(id_proprietaire));
+            oeuvre.setPrix(BigDecimal.valueOf(prix));
+            oeuvre.setTitre(titre);
+            em.persist(oeuvre);
         } catch (Exception e) {
             throw e;
         }
     }
 
-    public void Supprimer_Oeuvre_Id(int id_oeuvre) throws Exception {
-        Oeuvre oeuvreE = null;
+    @TransactionAttribute(TransactionAttributeType.REQUIRED)
+    public void updateOeuvre(int id_oeuvre, int id_proprietaire, double prix, String titre) throws Exception {
         try {
-            oeuvreE = Lire_Oeuvre_Id(id_oeuvre);
-            em.remove(oeuvreE);
+            Oeuvre oeuvre = findOeuvreById(id_oeuvre);
+            Proprietaire proprietaire = proprietaireF.Lire_Proprietaire_Id(id_proprietaire);
+            oeuvre.setPrix(BigDecimal.valueOf(prix));
+            oeuvre.setTitre(titre);
+            oeuvre.setProprietaire(proprietaire);
+            em.merge(oeuvre);
+        } catch (Exception e) {
+            throw e;
+        }
+    }
+
+    public void deleteOeuvre(int id_oeuvre) throws Exception {
+        try {
+            em.remove(findOeuvreById(id_oeuvre));
+        } catch (Exception e) {
+            throw e;
+        }
+    }
+
+    @TransactionAttribute(TransactionAttributeType.REQUIRED)
+    public void deleteReservation(java.util.Date dateRes, int id_oeuvre) throws Exception {
+        try {
+            em.remove(reservationF.findReservationByDateReservationOeuvreId(dateRes, id_oeuvre));
         } catch (Exception e) {
             throw e;
         }
